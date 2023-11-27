@@ -72,8 +72,8 @@ class ByolCycleGANModel(BaseModel):
         Parameters:
             opt (Option class)-- stores all the experiment flags; needs to be a subclass of BaseOptions
         """
-        byol_he = byol(load = True, path = '/home1/qiuliwang/Code/byol-pytorch-master/byol_pytorch/checkpoint_inuse/410_HE.pth.tar')
-        byol_cd4 = byol(load = True, path = '/home1/qiuliwang/Code/byol-pytorch-master/byol_pytorch/checkpoint_inuse/500_CD4.pth.tar')
+        byol_he = byol(load = True, path = '/home1/qiuliwang/Code/byol-pytorch-master/byol_pytorch/checkpoint/500_HE.pth.tar')
+        byol_cd4 = byol(load = True, path = '/home1/qiuliwang/Code/byol-pytorch-master/byol_pytorch/checkpoint/500_CD4.pth.tar')
 
         self.byol_he = byol_he.cuda()    
         self.byol_cd4 = byol_cd4.cuda()
@@ -196,7 +196,7 @@ class ByolCycleGANModel(BaseModel):
         
         self.B_cell_mask = torch.tensor(np.where(B_cell > 127, 1.0, -1.0)).cuda()
 
-    def backward_D_basic(self, netD, real, fake):
+    def backward_D_basic(self, netD, real, fake, byol_loss):
         """Calculate GAN loss for the discriminator
 
         Parameters:
@@ -214,7 +214,7 @@ class ByolCycleGANModel(BaseModel):
         pred_fake = netD(fake.detach())
         loss_D_fake = self.criterionGAN(pred_fake, False)
         # Combined loss and calculate gradients
-        loss_D = (loss_D_real + loss_D_fake) * 0.5
+        loss_D = (loss_D_real + loss_D_fake) * 0.5 + byol_loss * 0.5
         loss_D.backward()
         return loss_D
 
@@ -224,14 +224,17 @@ class ByolCycleGANModel(BaseModel):
         _, fake_b_byol_cd4 = self.byol_cd4(fake_B)
         _, real_b_byol_cd4 = self.byol_cd4(self.real_B)
 
-        self.loss_D_A = self.backward_D_basic(self.netD_A, self.real_B, fake_B) + self.criterionByolCD4(fake_b_byol_cd4, real_b_byol_cd4)
+        self.loss_D_A = self.backward_D_basic(self.netD_A, self.real_B, fake_B, self.criterionByolCD4(fake_b_byol_cd4, real_b_byol_cd4))
+        # self.loss_D_A.backward()
+
 
     def backward_D_B(self):
         """Calculate GAN loss for discriminator D_B"""
         fake_A = self.fake_A_pool.query(self.fake_A)
         _, fake_a_byol_he = self.byol_he(fake_A)
         _, real_a_byol_he = self.byol_he(self.real_A)
-        self.loss_D_B = self.backward_D_basic(self.netD_B, self.real_A, fake_A) + self.criterionByolHE(fake_a_byol_he, real_a_byol_he)
+        self.loss_D_B = self.backward_D_basic(self.netD_B, self.real_A, fake_A, self.criterionByolHE(fake_a_byol_he, real_a_byol_he))
+        # self.loss_D_B.backward()
 
     def backward_G(self):
         """Calculate the loss for generators G_A and G_B"""

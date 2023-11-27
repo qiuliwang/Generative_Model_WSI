@@ -67,7 +67,7 @@ if __name__ == '__main__':
                     # print(array.max())
                     # print(array.min())
                     # new_arr = ((arr - arr.min()) * (1/(arr.max() - arr.min()) * 255).astype('uint8'))
-                    for i in range(array.shape[0]):
+                    for i in range(10):
                         norm_image = cv2.normalize(array[i], None, alpha = 0, beta = 255, norm_type = cv2.NORM_MINMAX, dtype = cv2.CV_32F)
 
                         im = PIL.Image.fromarray(np.uint8(norm_image.transpose(1, 2, 0)))

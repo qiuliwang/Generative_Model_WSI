@@ -83,9 +83,9 @@ pathlogical_mask_cyclegan_he2cd4_multiscale
 
 python test.py --dataroot /home1/qiuliwang/Data/Glioma_annotation/test_13472_2048/inputs --name pathlogical_classic_cyclegan_he2cd4 --model test --no_dropout --gpu_id 4 --epoch 200 --num_test 20 --batch_size 16 
 
-python test.py --dataroot /home1/qiuliwang/Data/Glioma_annotation/test_13472_2048/inputs --name pathlogical_mask_cyclegan_he2cd4_multiscale --model test --no_dropout --gpu_id 4 --epoch 200 --num_test 20 --batch_size 16 
+python test.py --dataroot /home1/qiuliwang/Data/Glioma_annotation/test_13472_4096/inputs --name pathlogical_mask_cyclegan_he2cd4_multiscale --model test --no_dropout --gpu_id 4 --epoch 200 --num_test 20 --batch_size 16 
 
-python test.py --dataroot /home1/qiuliwang/Data/Glioma_annotation/test_13472_2048/inputs --name pathlogical_mask_cyclegan_he2cd4_multiscale_unet --model test --no_dropout --gpu_id 4 --epoch 200 --num_test 20 --batch_size 16  --netG unet_128
+python test.py --dataroot /home1/qiuliwang/Data/Glioma_annotation/test_13472/inputs --name pathlogical_mask_cyclegan_he2cd4_multiscale_unet --model test --no_dropout --gpu_id 4 --epoch 200 --num_test 20 --batch_size 16  --netG unet_128
 
 python test.py --dataroot /home1/qiuliwang/Data/Glioma_annotation/test_13472_2048/inputs --name transformer_mask_V3 --model test --no_dropout --gpu_id 4 --epoch 200 --num_test 20 --batch_size 16  --netG resnet_6blocks_vit3
 
@@ -97,5 +97,24 @@ python test.py --dataroot /home1/qiuliwang/Data/Glioma_annotation/test_13472_204
 python test.py --dataroot /home1/qiuliwang/Data/Glioma_annotation/test_13472_2048/inputs --name pathlogical_mask_byol_cyclegan_he2cd4_vit3 --model test --no_dropout --gpu_id 4 --epoch 200 --num_test 20 --batch_size 16  --netG resnet_6blocks_vit3
 
 
-# loss weight self.criterionByolCD4 is 1
-python train.py --dataroot /home1/qiuliwang/Data/Generative_Data/HE2CD4 --name pathlogical_mask_byol_cyclegan_he2cd4_vit3_weight --model byol_cycle_gan --gpu_id 0,1 --batch_size 16 --netG resnet_6blocks_vit3
+# loss weight self.criterionByolCD4 is 1 直接替换了byol
+
+python train.py --dataroot /home1/qiuliwang/Data/Generative_Data/HE2CD4 --name pathlogical_mask_byol_cyclegan_he2cd4_vit3_weight --model byol_cycle_gan --gpu_id 0 --batch_size 16 --netG resnet_6blocks_vit3 --epoch_count 200  --continue_train
+
+python test.py --dataroot /home1/qiuliwang/Data/Glioma_annotation/test_13472/inputs --name pathlogical_mask_byol_cyclegan_he2cd4_vit3_weight --model test --no_dropout --gpu_id 4 --epoch 300 --num_test 20 --batch_size 16  --netG resnet_6blocks_vit3
+
+# 替换NetG
+
+python train.py --dataroot /home1/qiuliwang/Data/Generative_Data/HE2CD4 --name pathlogical_mask_byol_cyclegan_he2cd4_vit3_weight_origen --model byol_cycle_gan --gpu_id 0 --batch_size 16 
+
+python test.py --dataroot /home1/qiuliwang/Data/Generative_Data/vessel_random_training/inputs_he --name pathlogical_mask_byol_cyclegan_he2cd4_vit3_weight_origen --model test --no_dropout --gpu_id 4 --epoch 200 --num_test 8440 --batch_size 16 
+
+
+--epoch_count 55  --continue_train
+
+
+# byol trained with multiscale
+python train.py --dataroot /home1/qiuliwang/Data/Generative_Data/HE2CD4 --name pathlogical_mask_byol_cyclegan_he2cd4_vit3_newbyol --model byol_cycle_gan --gpu_id 3 --batch_size 16 --netG resnet_6blocks_vit3 
+
+# mask guided with multiscale byol, 和现有模型差异就在byol
+python train.py --dataroot /home1/qiuliwang/Data/Generative_Data/HE2CD4 --name pathlogical_mask_byol_cyclegan_he2cd4_newbyol --model byol_cycle_gan --gpu_id 4 --batch_size 16
